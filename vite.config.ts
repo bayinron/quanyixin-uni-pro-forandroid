@@ -1,10 +1,12 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import uni from '@dcloudio/vite-plugin-uni'
 import AutoImport from "unplugin-auto-import/vite";
 import path from "path";
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ mode }) => {
   const UnoCss = await import('unocss/vite').then(i => i.default)
+  // 加载环境变量
+  const env = loadEnv(mode, process.cwd(), '')
 
   return {
     plugins: [
@@ -33,13 +35,12 @@ export default defineConfig(async () => {
       host: '0.0.0.0', // 设置开发服务器的 host
       port: 5000, // 设置开发服务器的端口
       proxy: {
-        '/wanhua': {
-          target: 'https://wanhua5.sxjzlwxh.com/', // 目标服务器
-          // target: 'http://101.55.21.220:1828/', // 目标服务器
+        '/quanyixin': {
+          target: "https://101.55.21.55/", // 目标服务器
           // target: 'https://wanhuawymy1.irpdg.com/', // 目标服务器
           secure: false,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/wanhua/, '') // 可选：重写路径
+          rewrite: (path) => path.replace(/^\/quanyixin/, '') // 去掉 /quanyixin 前缀，转发到目标服务器
         }
       }
     },

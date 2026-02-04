@@ -14,14 +14,24 @@ import { useUserStore } from '@/stores/modules/userStore';
 
 const baseURL = import.meta.env.VITE_APP_BASE_URL;
 //反向代理关键词
-const proxyKey = '/wanhua/';
+const proxyKey = '/quanyixin/';
 //服务器定义的url前缀
 // 添加拦截器
 const httpInterceptor = {
     // 拦截前触发
     invoke(options: UniApp.RequestOptions) {
+        // 判断是否为 H5 开发环境（使用代理）
+        // @ts-ignore
+        const isH5 = typeof window !== 'undefined' && typeof location !== 'undefined';
         const isDev = import.meta.env.MODE === 'development';
-        options.url = baseURL + 'api/' + options.url;
+        
+        if (isH5 && isDev) {
+            // H5 开发环境：使用代理前缀 /quanyixin/api/xxx
+            options.url = proxyKey + 'api/' + options.url;
+        } else {
+            // H5 生产环境、App、小程序：使用完整 baseURL
+            options.url = baseURL + 'api/' + options.url;
+        }
 
         // 2. 请求超时, 默认 60s
         options.timeout = 15000;

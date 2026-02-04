@@ -10,8 +10,7 @@
         {
             "path": "pages/home/index",
             "style": {
-                "navigationBarTitleText": "首页",
-                "navigationStyle": "custom"
+                "navigationBarTitleText": "首页"
             }
         },
         {
@@ -48,8 +47,7 @@
         {
             "path": "pages/repayment/index",
             "style": {
-                "navigationBarTitleText": "代还中心",
-                "navigationStyle": "custom"
+                "navigationBarTitleText": "代还中心"
             }
         },
         {
