@@ -188,23 +188,15 @@ export default {
             this.fallbackCopyTextToClipboard(text, tips);
         }
     },
-    fallbackCopyTextToClipboard: function (text: string, tips: string) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-            const successful = document.execCommand('copy');
-            console.log('Fallback: Copying text command was ' + (successful ? 'successful' : 'unsuccessful'));
-            this.showToast(tips);
-        } catch (err) {
-            console.error('Fallback: Oops, unable to copy', err);
-            this.showToast('复制失败,请手动长按复制');
-        }
-        document.body.removeChild(textArea);
+    // H5 备用的复制逻辑在 App 端无意义，这里保留空实现避免使用 document
+    fallbackCopyTextToClipboard: function (_text: string, _tips: string) {
+        // 在非 H5 端不会走到这里，H5 端优先使用 uni.setClipboardData
+        this.showToast('复制失败,请手动长按复制');
     },
     gotoKefu: function (url: string) {
-        window.location.href = url;
+        // 统一通过内置 webview 打开客服链接，兼容 App
+        uni.navigateTo({
+            url: '/pages/webview/index?url=' + encodeURIComponent(url)
+        });
     }
 };

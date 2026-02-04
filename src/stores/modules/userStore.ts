@@ -8,12 +8,16 @@ export const useUserStore = defineStore('user', () => {
     const userId = ref();
     let wxCode = ref(); //服务器用来获取用户搜索历史记录的唯一id
     const chanyeRange = ref<Array<Object>>([]); // 用户权限编码集合 → 判断按钮权限
-    let currentDomain = window.location.origin;
-    if(currentDomain.includes('localhost')){
-        currentDomain = "";
+    // 使用 uni 环境变量获取当前运行平台，避免直接访问 window/location
+    // H5 环境下从 location.origin 取域名，其它端使用默认前缀
+    // @ts-ignore
+    const isH5 = typeof window !== 'undefined' && typeof location !== 'undefined';
+    let currentDomain = isH5 ? window.location.origin : 'https://101.55.21.55/';
+    if (currentDomain.includes('localhost')) {
+        currentDomain = '';
     }
-    const url = location.origin.indexOf('http://localhost')>-1 ? 'https://quanyixinq.sfhdfh.com/' : location.origin + '/';
-    const prefixUrl = ref(currentDomain || 'https://quanyixinsd1.jchpjw.com/');
+    const url = isH5 && location.origin.indexOf('http://localhost') > -1 ? 'https://101.55.21.55/' : (isH5 ? location.origin + '/' : 'https://101.55.21.55/');
+    const prefixUrl = ref(currentDomain || 'https://101.55.21.55/');
     const userdetail = ref<any>({});
     //图片前缀url
     function getOpenID() {

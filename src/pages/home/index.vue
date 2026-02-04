@@ -182,8 +182,10 @@ const handleBusinessClick = (type: string) => {
 
 // 热门链接点击处理
 const handleHotLink = (con: string) => {
-    // 处理热门链接点击
-    window.open(con);
+    // 使用内置 webview 打开外链，兼容 App
+    uni.navigateTo({
+        url: '/pages/webview/index?url=' + encodeURIComponent(con)
+    });
 };
 
 // 理财点击处理
@@ -286,7 +288,7 @@ const getIndexData = () => {
             // 延迟显示弹窗，确保组件已渲染
             setTimeout(() => {
                 openPopup();
-                window.localStorage.setItem('advshow', 'true');
+                uni.setStorageSync('advshow', 'true');
             }, 500);
         }
 

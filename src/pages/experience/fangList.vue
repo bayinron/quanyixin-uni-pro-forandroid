@@ -83,7 +83,8 @@ const initData = async () => {
     const res: any = await getuserdetail();
     userInfo.value = res;
     userInfo.value.uselevel = Number(res.uselevel);
-    localStorage.setItem('pay_pwd', res.pay_pwd);
+    // 使用 uni 存储，兼容 App
+    uni.setStorageSync('pay_pwd', res.pay_pwd);
 };
 
 const getData = async (sx: string) => {

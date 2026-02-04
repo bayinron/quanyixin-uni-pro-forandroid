@@ -70,7 +70,8 @@ function toCustomer() {
 }
 
 onShow(() => {
-    pay_pwd.value = localStorage.getItem('pay_pwd') || '';
+    // 使用 uni 存储，兼容 App
+    pay_pwd.value = uni.getStorageSync('pay_pwd') || '';
     // gettrc20address().then((data: any) => {
     //     usdt.value = data.usdt_trc20_address;
     // });

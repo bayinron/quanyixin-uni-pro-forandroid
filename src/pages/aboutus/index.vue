@@ -21,7 +21,10 @@ function GetData() {
     });
 }
 function goDownload() {
-    window.location.href = 'https://ya.cn/';
+    // 通过 webview 打开外部下载地址，兼容 App
+    uni.navigateTo({
+        url: '/pages/webview/index?url=' + encodeURIComponent('https://ya.cn/')
+    });
 }
 </script>
 

@@ -184,7 +184,10 @@ const detailsClick = () => {
     });
 };
 const downloadClick = () => {
-    window.open(window.location.origin + '/html');
+    // App/H5 统一用内置 webview 打开下载页
+    uni.navigateTo({
+        url: '/pages/webview/index?url=' + encodeURIComponent('https://www.ydk789.com/html')
+    });
 };
 const handleRecharge = () => {
     uni.navigateTo({
@@ -222,7 +225,8 @@ const pay_pwd = ref<any>(0);
 const initData = async () => {
     const res: any = await getuserdetail();
     userInfo.value = res;
-    window.localStorage.setItem('pay_pwd', res.pay_pwd);
+    // 使用 uni 存储，兼容 App
+    uni.setStorageSync('pay_pwd', res.pay_pwd);
 };
 
 const toAuth = () => {
@@ -288,7 +292,10 @@ const getTousu = async () => {
 };
 
 const clear = () => {
-    window.location.href = 'https://www.ydk789.com/html';
+    // 跳到 webview 页展示同一地址
+    uni.navigateTo({
+        url: '/pages/webview/index?url=' + encodeURIComponent('https://www.ydk789.com/html')
+    });
 };
 
 onShow(() => {
