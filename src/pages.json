@@ -1,0 +1,374 @@
+{
+    "easycom": {
+        "autoscan": true,
+        "custom": {
+            "^uv-(.*)": "@climblee/uv-ui/components/uv-$1/uv-$1.vue",
+			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+        }
+    },
+    "pages": [
+        {
+            "path": "pages/home/index",
+            "style": {
+                "navigationBarTitleText": "首页",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/home/my",
+            "style": {
+                "navigationBarTitleText": "我的",
+                "navigationStyle": "custom" 
+            }
+        },
+        {
+            "path": "pages/mall/index",
+            "style": {
+                "navigationBarTitleText": "积分商城"
+            }
+        },
+        {
+            "path": "pages/aboutus/index",
+            "style": {
+                "navigationBarTitleText": "营业执照"
+            }
+        },
+        {
+            "path": "pages/login/index",
+            "style": {
+                "navigationBarTitleText": "登录"
+            }
+        },
+        {
+            "path": "pages/register/index",
+            "style": {
+                "navigationBarTitleText": "注册"
+            }
+        },
+        {
+            "path": "pages/repayment/index",
+            "style": {
+                "navigationBarTitleText": "代还中心",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/financial/index",
+            "style": {
+                "navigationBarTitleText": "理财"
+            }
+        },
+        {
+            "path": "pages/activity/index",
+            "style": {
+                "navigationBarTitleText": "活动中心"
+            }
+        },
+        {
+            "path": "pages/finish/index",
+            "style": {
+                "navigationBarTitleText": "代还账单记录",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/revenuedetails/index",
+            "style": {
+                "navigationBarTitleText": "收益详情"
+            }
+        },
+        {
+            "path": "pages/contract/index",
+            "style": {
+                "navigationBarTitleText": "电子合同书"
+            }
+        },
+        {
+            "path": "pages/experience/index",
+            "style": {
+                "navigationBarTitleText": "贷款垫资"
+            }
+        },
+        {
+            "path": "pages/experience/cheList",
+            "style": {
+                "navigationBarTitleText": "车贷专享"
+            }
+        },
+        {
+            "path": "pages/experience/fangList",
+            "style": {
+                "navigationBarTitleText": "房贷专享"
+            }
+        },
+        {
+            "path": "pages/experience/cheDetail",
+            "style": {
+                "navigationBarTitleText": ""
+            }
+        },
+        {
+            "path": "pages/experience/fang",
+            "style": {
+                "navigationBarTitleText": "房贷垫资"
+            }
+        },
+        {
+            "path": "pages/experience/aixinDetail",
+            "style": {
+                "navigationBarTitleText": "爱心援助"
+            }
+        },
+        {
+            "path": "pages/experience/fangDetail",
+            "style": {
+                "navigationBarTitleText": "房贷垫资"
+            }
+        },
+        {
+            "path": "pages/experience/qiye",
+            "style": {
+                "navigationBarTitleText": "企业专区"
+            }
+        },
+        {
+            "path": "pages/signin/index",
+            "style": {
+                "navigationBarTitleText": "签到",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/goldeneggs/index",
+            "style": {
+                "navigationBarTitleText": "福利活动",
+                "navigationStyle": "custom"
+            }
+        },  {
+            "path": "pages/invite/index",
+            "style": {
+                "navigationBarTitleText": "邀请好友",
+                "navigationStyle": "custom"
+            }
+        }, {
+            "path": "pages/platform/index",
+            "style": {
+                "navigationBarTitleText": "企业简介",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/password/index",
+            "style": {
+                "navigationBarTitleText": "登录密码"
+            }
+        },
+        {
+            "path": "pages/forget",
+            "style": {
+                "navigationBarTitleText": "忘记密码",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/teamrule/index",
+            "style": {
+                "navigationBarTitleText": "企业规则",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/teamjz/index",
+            "style": {
+                "navigationBarTitleText": "",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/novice/index",
+            "style": {
+                "navigationBarTitleText": "新手教程",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/customer/index",
+            "style": {
+                "navigationBarTitleText": "客服"
+            }
+        },
+        {
+            "path": "pages/recharge/rmb",
+            "style": {
+                "navigationBarTitleText": "人民币充值"
+            }
+        },
+        {
+            "path": "pages/recharge/usdt",
+            "style": {
+                "navigationBarTitleText": "充值USDT"
+            }
+        },
+        {
+            "path": "pages/webview/index",
+            "style": {
+                "navigationBarTitleText": "客服"
+            }
+        },
+        {
+            "path": "pages/withdrawtype/index",
+            "style": {
+                "navigationBarTitleText": "提现方式"
+            }
+        },
+    
+     
+        {
+            "path": "pages/usdt/address",
+            "style": {
+                "navigationBarTitleText": "USDT地址"
+            }
+        },
+        {
+            "path": "pages/usdtwithdraw/index",
+            "style": {
+                "navigationBarTitleText": "USDT提现"
+            }
+        } ,{
+            "path": "pages/withdraw/index",
+            "style": {
+                "navigationBarTitleText": "银行卡提现"
+            }
+        },
+        {
+            "path": "pages/topay/index",
+            "style": {
+                "navigationBarTitleText": "支付密码",
+            }
+        },
+        {
+            "path": "pages/teamreport/index",
+            "style": {
+                "navigationBarTitleText": "团队报表"
+            }
+        },
+        {
+            "path": "pages/chatcon/index",
+            "style": {
+                "navigationBarTitleText": "客服",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/auth/index",
+            "style": {
+                "navigationBarTitleText": "实名认证"
+            }
+        },
+        {
+            "path": "pages/details/index",
+            "style": {
+                "navigationBarTitleText": "账户明细"
+            }
+        },
+        {
+            "path": "pages/exchange/index",
+            "style": {
+                "navigationBarTitleText": "兑换记录"
+            }
+        },
+        {
+            "path": "pages/deposit/index",
+            "style": {
+                "navigationBarTitleText": "存入记录"
+            }
+        },
+        {
+            "path": "pages/takeout/index",
+            "style": {
+                "navigationBarTitleText": "提现记录"
+            }
+        },
+        {
+            "path": "pages/address/index",
+            "style": {
+                "navigationBarTitleText": "地址管理"
+            }
+        },
+        {
+            "path": "pages/addaddress/index",
+            "style": {
+                "navigationBarTitleText": "添加地址"
+            }
+        },
+        {
+            "path": "pages/creditcard/index",
+            "style": {
+                "navigationBarTitleText": "信用卡专区"
+            }
+        },
+        {
+            "path": "pages/carloan/index",
+            "style": {
+                "navigationBarTitleText": "车贷专区"
+            }
+        },
+        {
+            "path": "pages/mortgage/index",
+            "style": {
+                "navigationBarTitleText": "房贷专区"
+            }
+        },
+        {
+            "path": "pages/lucky/index",
+            "style": {
+              "navigationBarTitleText": "福利活动"
+            }
+          }
+    ],
+    "globalStyle": {
+        "navigationBarTextStyle": "white",
+        "navigationBarTitleText": "全意信",
+        "navigationBarBackgroundColor": "#000",
+        "backgroundColor": "#f3f4f8",
+        "disableBounce": true ,
+        "app-plus": {
+			
+			"bounce": "none"
+		}
+    },
+    "tabBar": {
+        "color": "#000",
+        "selectedColor": "#B36735",
+        "backgroundColor": "#fff",
+        "fontSize": "14px",
+        "height": "60px",
+        "list": [
+            {
+                "pagePath": "pages/home/index",
+                "text": "首页",
+                "iconPath": "static/tab/index.png",
+                "selectedIconPath": "static/tab/index_a.png"
+            },
+            
+            {
+                "pagePath": "pages/mall/index",
+                "text": "商城",
+                "iconPath": "static/tab/shop.png",
+                "selectedIconPath": "static/tab/shop_a.png"
+            },
+            {
+                "pagePath": "pages/repayment/index",
+                "text": "代还",
+                "iconPath": "static/tab/yw.png",
+                "selectedIconPath": "static/tab/yw_a.png"
+            },
+            {
+                "pagePath": "pages/home/my",
+                "text": "我的",
+                "iconPath": "static/tab/my.png",
+                "selectedIconPath": "static/tab/my_a.png"
+            }
+        ]
+    }
+}
