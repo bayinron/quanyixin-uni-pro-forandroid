@@ -43,9 +43,24 @@
                     <div class="upload_section">
                         <div class="upload_title">上传付款凭证信息</div>
                         <div class="pz_img">
-                            <uv-upload :fileList="fileList1" name="6" @afterRead="afterRead" :width="imgWidth" :height="imgHeight" @delete="deletePic" :maxCount="1">
-                                <img src="@/static/img/dxc.png" alt="" />
-                            </uv-upload>
+                            <view class="upload-wrapper" @click="chooseImage">
+                                <image 
+                                    v-if="previewImage" 
+                                    :src="previewImage" 
+                                    mode="widthFix"
+                                    class="preview-image"
+                                />
+                                <view v-else class="upload-placeholder">
+                                    <image 
+                                        src="@/static/img/dxc.png" 
+                                        mode="widthFix" 
+                                        class="placeholder-icon"
+                                    />
+                                </view>
+                                <view v-if="previewImage" class="delete-btn" @click.stop="deletePic">
+                                    <text>×</text>
+                                </view>
+                            </view>
                         </div>
                     </div>
 
@@ -77,58 +92,143 @@ interface UserInfo {
 
 const userInfo = ref<UserInfo>({} as UserInfo);
 const src = ref('');
-const amounts = [200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000];
-const pingzheng = ref<HTMLInputElement | null>(null);
+const previewImage = ref<string>('');
 const url = ref<string | null>(null);
 const type = ref<string | null>(null);
-const fileList1 = ref<any>([]);
-const imgWidth = ref<string>('375rpx');
-const imgHeight = ref<string>('500rpx');
 
-// 删除图片
-const deletePic = (event: any) => {
-    fileList1.value.splice(event.index, 1);
+// 选择图片
+const chooseImage = () => {
+    uni.chooseImage({
+        count: 1,
+        sizeType: ['original', 'compressed'],
+        sourceType: ['album', 'camera'],
+        success: (res) => {
+            const tempFilePath = res.tempFilePaths[0];
+            previewImage.value = tempFilePath;
+            // 将图片转换为 base64
+            convertToBase64(tempFilePath);
+        },
+        fail: (err) => {
+            console.error('选择图片失败:', err);
+            uni.showToast({
+                title: '选择图片失败',
+                icon: 'none'
+            });
+        }
+    });
 };
 
-// 新增图片
-const afterRead = async (event: any) => {
-    // 当设置 multiple 为 true 时, file 为数组格式，否则为对象格式
-    let lists = Array.isArray(event.file) ? event.file : [event.file];
-    let fileListLen = fileList1.value.length;
-    lists.forEach((item: any) => {
-        fetch(item.url)
-            .then((response) => response.blob())
-            .then((blob) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = () => {
-                    const base64data = reader.result as string;
-                    fileList1.value.push({
-                        ...item,
-                        status: 'local',
-                        message: '本地已读取',
-                        base64: base64data // 存储 Base64 编码
-                    });
-
-                    // console.log('Base64:', base64data);
-                    src.value = base64data;
-
-                    // 创建 Image 对象获取图片尺寸
-                    const img = new Image();
-                    img.onload = () => {
-                        const width = img.width;
-                        const height = img.height;
-                        console.log('Image dimensions:', width, height);
-                        imgWidth.value = '375rpx';
-                        imgHeight.value = (height / width) * 375 + 'rpx';
-                    };
-                    img.src = base64data;
-                };
-            })
-            .catch((error) => {
-                console.error('Error converting to Base64:', error);
+// 将图片转换为 base64
+const convertToBase64 = (filePath: string) => {
+    // #ifdef H5
+    // H5 端使用 fetch + FileReader
+    fetch(filePath)
+        .then(response => response.blob())
+        .then(blob => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64data = reader.result as string;
+                src.value = base64data;
+                console.log('H5 图片转换成功，base64 长度:', base64data.length);
+            };
+            reader.onerror = () => {
+                console.error('FileReader 错误');
+                uni.showToast({
+                    title: '图片转换失败',
+                    icon: 'none'
+                });
+            };
+            reader.readAsDataURL(blob);
+        })
+        .catch(err => {
+            console.error('fetch 错误:', err);
+            uni.showToast({
+                title: '图片读取失败',
+                icon: 'none'
             });
+        });
+    // #endif
+    
+    // #ifdef APP-PLUS
+    // App 端优先使用 plus.io
+    if (typeof plus !== 'undefined' && plus.io) {
+        plus.io.resolveLocalFileSystemURL(filePath, (entry: any) => {
+            entry.file((file: any) => {
+                const reader = new FileReader();
+                reader.onloadend = (evt: any) => {
+                    const base64data = evt.target?.result as string || (evt as any).result as string;
+                    if (base64data) {
+                        src.value = base64data;
+                        console.log('App plus.io 转换成功，base64 长度:', base64data.length);
+                    } else {
+                        // 备用方案：使用 uni.getFileSystemManager
+                        useFileSystemManager(filePath);
+                    }
+                };
+                reader.onerror = () => {
+                    useFileSystemManager(filePath);
+                };
+                reader.readAsDataURL(file);
+            }, () => {
+                useFileSystemManager(filePath);
+            });
+        }, () => {
+            useFileSystemManager(filePath);
+        });
+    } else {
+        useFileSystemManager(filePath);
+    }
+    // #endif
+    
+    // #ifdef MP
+    // 小程序端使用 uni.getFileSystemManager
+    useFileSystemManager(filePath);
+    // #endif
+};
+
+// 使用 uni.getFileSystemManager 读取文件（App 和小程序端）
+const useFileSystemManager = (filePath: string) => {
+    // 检查 uni.getFileSystemManager 是否可用
+    if (typeof uni.getFileSystemManager !== 'function') {
+        console.error('uni.getFileSystemManager 不可用');
+        uni.showToast({
+            title: '当前平台不支持文件读取',
+            icon: 'none'
+        });
+        return;
+    }
+    
+    const fsm = uni.getFileSystemManager();
+    fsm.readFile({
+        filePath: filePath,
+        encoding: 'base64',
+        success: (res: any) => {
+            // 判断图片类型
+            let mimeType = 'image/jpeg';
+            if (filePath.includes('.png') || filePath.toLowerCase().includes('png')) {
+                mimeType = 'image/png';
+            } else if (filePath.includes('.gif') || filePath.toLowerCase().includes('gif')) {
+                mimeType = 'image/gif';
+            }
+            // 生成 base64 字符串，格式：data:image/png;base64,xxxxx
+            const base64data = `data:${mimeType};base64,${res.data}`;
+            src.value = base64data;
+            console.log('图片转换成功，base64 长度:', base64data.length);
+        },
+        fail: (err: any) => {
+            console.error('读取文件失败:', err);
+            uni.showToast({
+                title: '图片读取失败，请重试',
+                icon: 'none'
+            });
+        }
     });
+};
+
+// 删除图片
+const deletePic = () => {
+    previewImage.value = '';
+    src.value = '';
 };
 
 const handleSubmit = () => {
@@ -146,6 +246,13 @@ const handleSubmit = () => {
         });
         return;
     }
+    if (!src.value) {
+        uni.showToast({
+            title: '请上传付款凭证',
+            icon: 'none'
+        });
+        return;
+    }
 
     bankRecharge(money.value.toString(), src.value, address.value, '1').then((data: any) => {
         uni.showToast({
@@ -155,6 +262,12 @@ const handleSubmit = () => {
         setTimeout(() => {
             globalTool.back();
         }, 1000);
+    }).catch((err: any) => {
+        console.error('充值失败:', err);
+        uni.showToast({
+            title: '充值失败，请重试',
+            icon: 'none'
+        });
     });
 };
 
@@ -339,20 +452,53 @@ page {
                     justify-content: center;
                     align-items: center;
                     
-                    :deep(img) {
-                        width: 50%;
-                        object-fit: contain;
-                    }
-                    
-                    :deep(.uv-upload__wrap__preview__image) {
-                        margin-top: 4rpx;
+                    .upload-wrapper {
+                        position: relative;
                         width: 100%;
-                        height: 100px;
-                    }
-                    
-                    :deep(.uv-upload__wrap) {
+                        display: flex;
                         justify-content: center;
                         align-items: center;
+                        min-height: 200rpx;
+                        
+                        .upload-placeholder {
+                            width: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            
+                            .placeholder-icon {
+                                width: 50%;
+                                display: block;
+                            }
+                        }
+                        
+                        .preview-image {
+                            max-width: 100%;
+                            border-radius: 8rpx;
+                            display: block;
+                        }
+                        
+                        .delete-btn {
+                            position: absolute;
+                            top: -10rpx;
+                            right: -10rpx;
+                            width: 50rpx;
+                            height: 50rpx;
+                            background-color: #ff4444;
+                            border-radius: 50%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            color: #fff;
+                            font-size: 40rpx;
+                            font-weight: bold;
+                            z-index: 10;
+                            box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+                            
+                            text {
+                                line-height: 1;
+                            }
+                        }
                     }
                 }
             }
