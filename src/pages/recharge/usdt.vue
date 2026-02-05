@@ -112,22 +112,12 @@ const chooseImage = () => {
                 src: tempFilePath,
                 success: (info) => {
                     console.log('图片信息验证成功:', info);
-                    uni.showModal({
-                        title: '调试-选图成功',
-                        content: `路径: ${tempFilePath}\n宽高: ${info.width} x ${info.height}`,
-                        showCancel: false
-                    });
                     previewImage.value = tempFilePath;
                     // 将图片转换为 base64
                     convertToBase64(tempFilePath);
                 },
                 fail: (err) => {
                     console.error('图片信息验证失败:', err);
-                    uni.showModal({
-                        title: '调试-选图失败',
-                        content: `getImageInfo 失败: ${JSON.stringify(err)}`,
-                        showCancel: false
-                    });
                     uni.showToast({
                         title: '图片无效，请重新选择',
                         icon: 'none'
@@ -178,29 +168,14 @@ const convertToBase64 = (filePath: string) => {
     
     // #ifdef APP-PLUS
     // App 端使用 plus.io 读取文件
-    uni.showModal({
-        title: '调试-App 端开始转换',
-        content: `文件路径: ${filePath}`,
-        showCancel: false
-    });
     usePlusIO(filePath);
     // #endif
-    uni.showModal({
-        title: '11111',
-        content: `文件路径: ${filePath}`,
-        showCancel: false
-    });
 };
 
 // App 端使用 plus.io 读取文件
 const usePlusIO = (filePath: string) => {
     if (typeof plus === 'undefined' || !plus.io) {
         console.error('plus.io 不可用');
-        uni.showModal({
-            title: '调试-plus.io 不可用',
-            content: '当前环境没有 plus.io，无法读取文件',
-            showCancel: false
-        });
         uni.showToast({
             title: '当前环境不支持文件读取',
             icon: 'none'
@@ -208,24 +183,8 @@ const usePlusIO = (filePath: string) => {
         return;
     }
     
-    uni.showModal({
-        title: '调试-使用 plus.io 读取文件',
-        content: `文件路径: ${filePath}`,
-        showCancel: false
-    });
     plus.io.resolveLocalFileSystemURL(filePath, (entry: any) => {
-        uni.showModal({
-            title: '调试-使用 plus.io 读取文件成功',
-            content: `文件路径: ${filePath}`,
-            showCancel: false
-        });
         entry.file((file: any) => {
-            uni.showModal({
-                title: '调试-entry.file',
-                content: `文件名: ${file.name}\n大小: ${file.size}`,
-                showCancel: false
-            });
-
             // 关键修改：在 App 端使用 plus.io.FileReader，而不是 H5 的 FileReader
             const reader = new plus.io.FileReader();
 
@@ -235,18 +194,8 @@ const usePlusIO = (filePath: string) => {
                     src.value = base64data;
                     console.log('plus.io 转换成功，base64 长度:', base64data.length);
                     console.log('base64 前100个字符:', base64data.substring(0, 100));
-                    uni.showModal({
-                        title: '调试-base64 成功',
-                        content: `长度: ${base64data.length}\n前50字符:\n${base64data.substring(0, 50)}`,
-                        showCancel: false
-                    });
                 } else {
                     console.error('base64 数据为空');
-                    uni.showModal({
-                        title: '调试-base64 为空',
-                        content: 'reader.onloadend 返回空数据',
-                        showCancel: false
-                    });
                     uni.showToast({
                         title: '图片数据为空，请重试',
                         icon: 'none'
@@ -256,11 +205,6 @@ const usePlusIO = (filePath: string) => {
 
             reader.onerror = (err: any) => {
                 console.error('plus.io.FileReader 错误:', err);
-                uni.showModal({
-                    title: '调试-plus.FileReader 错误',
-                    content: JSON.stringify(err),
-                    showCancel: false
-                });
                 uni.showToast({
                     title: '图片读取失败，请重试',
                     icon: 'none'
@@ -271,11 +215,6 @@ const usePlusIO = (filePath: string) => {
             reader.readAsDataURL(file);
         }, (err: any) => {
             console.error('entry.file 失败:', err);
-            uni.showModal({
-                title: '调试-entry.file 失败',
-                content: JSON.stringify(err),
-                showCancel: false
-            });
             uni.showToast({
                 title: '无法读取文件，请重新选择',
                 icon: 'none'
@@ -283,11 +222,6 @@ const usePlusIO = (filePath: string) => {
         });
     }, (err: any) => {
         console.error('resolveLocalFileSystemURL 失败:', err);
-        uni.showModal({
-            title: '调试-路径解析失败',
-            content: JSON.stringify(err),
-            showCancel: false
-        });
         uni.showToast({
             title: '文件路径无效，请重新选择',
             icon: 'none'
@@ -362,11 +296,6 @@ const handleSubmit = () => {
         'previewImage =', previewImage.value,
         'src length =', src.value ? src.value.length : 0
     );
-    uni.showModal({
-        title: '调试-提交前数据',
-        content: `地址: ${address.value}\n金额: ${money.value}\n有预览图: ${!!previewImage.value}\nsrc 长度: ${src.value ? src.value.length : 0}`,
-        showCancel: false
-    });
 
     if (!address.value) {
         console.log('校验未通过：address 为空');
@@ -386,11 +315,6 @@ const handleSubmit = () => {
     }
     if (!src.value) {
         console.log('校验未通过：src 为空，尚未获取到 base64 凭证');
-        uni.showModal({
-            title: '调试-src 为空',
-            content: `previewImage: ${previewImage.value}\nsrc 长度: 0\n说明 base64 尚未生成`,
-            showCancel: false
-        });
         uni.showToast({
             title: '请上传付款凭证',
             icon: 'none'
@@ -405,18 +329,8 @@ const handleSubmit = () => {
         'usdt(address) =', address.value,
         'id = 1'
     );
-    uni.showModal({
-        title: '调试-开始发起 bankRecharge 请求',
-        content: `money = ${money.value.toString()}\nsrc length = ${src.value.length}\nusdt(address) = ${address.value}\nid = 1`,
-        showCancel: false
-    });
     bankRecharge(money.value.toString(), src.value, address.value, '1')
         .then((data: any) => {
-            uni.showModal({
-                title: '调试-充值接口返回成功',
-                content: `data = ${JSON.stringify(data)}`,
-                showCancel: false
-            });
             uni.showToast({
                 title: '充值成功',
                 icon: 'success'
@@ -426,11 +340,6 @@ const handleSubmit = () => {
             }, 1000);
         })
         .catch((err: any) => {
-            uni.showModal({
-                title: '调试-充值接口返回失败',
-                content: `err = ${JSON.stringify(err)}`,
-                showCancel: false
-            });
             uni.showToast({
                 title: '充值失败，请重试',
                 icon: 'none'
