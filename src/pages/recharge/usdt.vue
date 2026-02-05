@@ -104,9 +104,36 @@ const chooseImage = () => {
         sourceType: ['album', 'camera'],
         success: (res) => {
             const tempFilePath = res.tempFilePaths[0];
-            previewImage.value = tempFilePath;
-            // 将图片转换为 base64
-            convertToBase64(tempFilePath);
+            console.log('选择的图片路径:', tempFilePath);
+            console.log('所有临时路径:', res.tempFilePaths);
+            
+            // 先验证图片是否可以访问
+            uni.getImageInfo({
+                src: tempFilePath,
+                success: (info) => {
+                    console.log('图片信息验证成功:', info);
+                    uni.showModal({
+                        title: '调试-选图成功',
+                        content: `路径: ${tempFilePath}\n宽高: ${info.width} x ${info.height}`,
+                        showCancel: false
+                    });
+                    previewImage.value = tempFilePath;
+                    // 将图片转换为 base64
+                    convertToBase64(tempFilePath);
+                },
+                fail: (err) => {
+                    console.error('图片信息验证失败:', err);
+                    uni.showModal({
+                        title: '调试-选图失败',
+                        content: `getImageInfo 失败: ${JSON.stringify(err)}`,
+                        showCancel: false
+                    });
+                    uni.showToast({
+                        title: '图片无效，请重新选择',
+                        icon: 'none'
+                    });
+                }
+            });
         },
         fail: (err) => {
             console.error('选择图片失败:', err);
@@ -150,43 +177,125 @@ const convertToBase64 = (filePath: string) => {
     // #endif
     
     // #ifdef APP-PLUS
-    // App 端优先使用 plus.io
-    if (typeof plus !== 'undefined' && plus.io) {
-        plus.io.resolveLocalFileSystemURL(filePath, (entry: any) => {
-            entry.file((file: any) => {
-                const reader = new FileReader();
-                reader.onloadend = (evt: any) => {
-                    const base64data = evt.target?.result as string || (evt as any).result as string;
-                    if (base64data) {
-                        src.value = base64data;
-                        console.log('App plus.io 转换成功，base64 长度:', base64data.length);
-                    } else {
-                        // 备用方案：使用 uni.getFileSystemManager
-                        useFileSystemManager(filePath);
-                    }
-                };
-                reader.onerror = () => {
-                    useFileSystemManager(filePath);
-                };
-                reader.readAsDataURL(file);
-            }, () => {
-                useFileSystemManager(filePath);
-            });
-        }, () => {
-            useFileSystemManager(filePath);
-        });
-    } else {
-        useFileSystemManager(filePath);
-    }
+    // App 端使用 plus.io 读取文件
+    uni.showModal({
+        title: '调试-App 端开始转换',
+        content: `文件路径: ${filePath}`,
+        showCancel: false
+    });
+    usePlusIO(filePath);
     // #endif
-    
-    // #ifdef MP
-    // 小程序端使用 uni.getFileSystemManager
-    useFileSystemManager(filePath);
-    // #endif
+    uni.showModal({
+        title: '11111',
+        content: `文件路径: ${filePath}`,
+        showCancel: false
+    });
 };
 
-// 使用 uni.getFileSystemManager 读取文件（App 和小程序端）
+// App 端使用 plus.io 读取文件
+const usePlusIO = (filePath: string) => {
+    if (typeof plus === 'undefined' || !plus.io) {
+        console.error('plus.io 不可用');
+        uni.showModal({
+            title: '调试-plus.io 不可用',
+            content: '当前环境没有 plus.io，无法读取文件',
+            showCancel: false
+        });
+        uni.showToast({
+            title: '当前环境不支持文件读取',
+            icon: 'none'
+        });
+        return;
+    }
+    
+    uni.showModal({
+        title: '调试-使用 plus.io 读取文件',
+        content: `文件路径: ${filePath}`,
+        showCancel: false
+    });
+    plus.io.resolveLocalFileSystemURL(filePath, (entry: any) => {
+        uni.showModal({
+            title: '调试-使用 plus.io 读取文件成功',
+            content: `文件路径: ${filePath}`,
+            showCancel: false
+        });
+        entry.file((file: any) => {
+            uni.showModal({
+                title: '调试-entry.file',
+                content: `文件名: ${file.name}\n大小: ${file.size}`,
+                showCancel: false
+            });
+
+            // 关键修改：在 App 端使用 plus.io.FileReader，而不是 H5 的 FileReader
+            const reader = new plus.io.FileReader();
+
+            reader.onloadend = (evt: any) => {
+                const base64data = evt.target?.result as string || (evt as any).result as string;
+                if (base64data) {
+                    src.value = base64data;
+                    console.log('plus.io 转换成功，base64 长度:', base64data.length);
+                    console.log('base64 前100个字符:', base64data.substring(0, 100));
+                    uni.showModal({
+                        title: '调试-base64 成功',
+                        content: `长度: ${base64data.length}\n前50字符:\n${base64data.substring(0, 50)}`,
+                        showCancel: false
+                    });
+                } else {
+                    console.error('base64 数据为空');
+                    uni.showModal({
+                        title: '调试-base64 为空',
+                        content: 'reader.onloadend 返回空数据',
+                        showCancel: false
+                    });
+                    uni.showToast({
+                        title: '图片数据为空，请重试',
+                        icon: 'none'
+                    });
+                }
+            };
+
+            reader.onerror = (err: any) => {
+                console.error('plus.io.FileReader 错误:', err);
+                uni.showModal({
+                    title: '调试-plus.FileReader 错误',
+                    content: JSON.stringify(err),
+                    showCancel: false
+                });
+                uni.showToast({
+                    title: '图片读取失败，请重试',
+                    icon: 'none'
+                });
+            };
+
+            // 这里直接传入 5+ 的 File 对象，由 plus.io.FileReader 负责读取
+            reader.readAsDataURL(file);
+        }, (err: any) => {
+            console.error('entry.file 失败:', err);
+            uni.showModal({
+                title: '调试-entry.file 失败',
+                content: JSON.stringify(err),
+                showCancel: false
+            });
+            uni.showToast({
+                title: '无法读取文件，请重新选择',
+                icon: 'none'
+            });
+        });
+    }, (err: any) => {
+        console.error('resolveLocalFileSystemURL 失败:', err);
+        uni.showModal({
+            title: '调试-路径解析失败',
+            content: JSON.stringify(err),
+            showCancel: false
+        });
+        uni.showToast({
+            title: '文件路径无效，请重新选择',
+            icon: 'none'
+        });
+    });
+};
+
+// 使用 uni.getFileSystemManager 读取文件（小程序端）
 const useFileSystemManager = (filePath: string) => {
     // 检查 uni.getFileSystemManager 是否可用
     if (typeof uni.getFileSystemManager !== 'function') {
@@ -198,11 +307,23 @@ const useFileSystemManager = (filePath: string) => {
         return;
     }
     
+    console.log('使用 getFileSystemManager 读取文件:', filePath);
     const fsm = uni.getFileSystemManager();
+    
     fsm.readFile({
         filePath: filePath,
         encoding: 'base64',
         success: (res: any) => {
+            console.log('readFile 成功，数据长度:', res.data?.length);
+            if (!res.data) {
+                console.error('读取的数据为空');
+                uni.showToast({
+                    title: '图片数据为空，请重试',
+                    icon: 'none'
+                });
+                return;
+            }
+            
             // 判断图片类型
             let mimeType = 'image/jpeg';
             if (filePath.includes('.png') || filePath.toLowerCase().includes('png')) {
@@ -214,9 +335,10 @@ const useFileSystemManager = (filePath: string) => {
             const base64data = `data:${mimeType};base64,${res.data}`;
             src.value = base64data;
             console.log('图片转换成功，base64 长度:', base64data.length);
+            console.log('base64 前100个字符:', base64data.substring(0, 100));
         },
         fail: (err: any) => {
-            console.error('读取文件失败:', err);
+            console.error('readFile 失败:', err);
             uni.showToast({
                 title: '图片读取失败，请重试',
                 icon: 'none'
@@ -227,12 +349,27 @@ const useFileSystemManager = (filePath: string) => {
 
 // 删除图片
 const deletePic = () => {
+    console.log('删除图片，清空 previewImage 和 src');
     previewImage.value = '';
     src.value = '';
 };
 
 const handleSubmit = () => {
+    console.log(
+        '准备提交充值，当前数据：',
+        'address =', address.value,
+        'money =', money.value,
+        'previewImage =', previewImage.value,
+        'src length =', src.value ? src.value.length : 0
+    );
+    uni.showModal({
+        title: '调试-提交前数据',
+        content: `地址: ${address.value}\n金额: ${money.value}\n有预览图: ${!!previewImage.value}\nsrc 长度: ${src.value ? src.value.length : 0}`,
+        showCancel: false
+    });
+
     if (!address.value) {
+        console.log('校验未通过：address 为空');
         uni.showToast({
             title: '请输入收款地址',
             icon: 'none'
@@ -240,6 +377,7 @@ const handleSubmit = () => {
         return;
     }
     if (!money.value) {
+        console.log('校验未通过：money 为空');
         uni.showToast({
             title: '请输入充值数量',
             icon: 'none'
@@ -247,6 +385,12 @@ const handleSubmit = () => {
         return;
     }
     if (!src.value) {
+        console.log('校验未通过：src 为空，尚未获取到 base64 凭证');
+        uni.showModal({
+            title: '调试-src 为空',
+            content: `previewImage: ${previewImage.value}\nsrc 长度: 0\n说明 base64 尚未生成`,
+            showCancel: false
+        });
         uni.showToast({
             title: '请上传付款凭证',
             icon: 'none'
@@ -254,21 +398,44 @@ const handleSubmit = () => {
         return;
     }
 
-    bankRecharge(money.value.toString(), src.value, address.value, '1').then((data: any) => {
-        uni.showToast({
-            title: '充值成功',
-            icon: 'success'
-        });
-        setTimeout(() => {
-            globalTool.back();
-        }, 1000);
-    }).catch((err: any) => {
-        console.error('充值失败:', err);
-        uni.showToast({
-            title: '充值失败，请重试',
-            icon: 'none'
-        });
+    console.log(
+        '开始发起 bankRecharge 请求：',
+        'moneys =', money.value.toString(),
+        'con(src length) =', src.value.length,
+        'usdt(address) =', address.value,
+        'id = 1'
+    );
+    uni.showModal({
+        title: '调试-开始发起 bankRecharge 请求',
+        content: `money = ${money.value.toString()}\nsrc length = ${src.value.length}\nusdt(address) = ${address.value}\nid = 1`,
+        showCancel: false
     });
+    bankRecharge(money.value.toString(), src.value, address.value, '1')
+        .then((data: any) => {
+            uni.showModal({
+                title: '调试-充值接口返回成功',
+                content: `data = ${JSON.stringify(data)}`,
+                showCancel: false
+            });
+            uni.showToast({
+                title: '充值成功',
+                icon: 'success'
+            });
+            setTimeout(() => {
+                globalTool.back();
+            }, 1000);
+        })
+        .catch((err: any) => {
+            uni.showModal({
+                title: '调试-充值接口返回失败',
+                content: `err = ${JSON.stringify(err)}`,
+                showCancel: false
+            });
+            uni.showToast({
+                title: '充值失败，请重试',
+                icon: 'none'
+            });
+        });
 };
 
 const getUrl = (_type: string) => {
